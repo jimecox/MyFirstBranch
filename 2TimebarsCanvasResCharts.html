@@ -1,0 +1,258 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Jim Bucket Drag and Drop</title>
+    <!--Framework CSS-->
+    <link href="cssJqueryUI/jquery-ui1.11.3Smoothness2.css" rel="stylesheet" />
+    <link href="css/jquery-ui1.11.3Smoothness2.css" rel="stylesheet" />
+    <link href="css/bootstrap.min3.1.1.css" rel="stylesheet" />
+    <link href="css/jquery.dataTables.css" rel="stylesheet" />
+    <!--Timebars CSS-->
+    <link href="css/AppCss.css" rel="stylesheet" />
+    <link href="css/TimeBarCss.css" rel="stylesheet" />
+    <link href="css/MasterTimeScale.css" rel="stylesheet" />
+    <link href="css/ResourceCharts.css" rel="stylesheet" />
+    <link href="pqGrid/pqgrid.min.css" rel="stylesheet" />
+    <link href="pqGrid/themes/office/pqgrid.css" rel="stylesheet" />
+    <script src="Scripts-Framework/jquery-1.10.2.js"></script>
+
+    <style type="text/css">
+        .auto-style1 {
+            border: 1px solid #808000;
+            background-color: #C0C0C0;
+        }
+
+        .auto-style2 {
+            background-color: #D0E9C6;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div style="position: fixed; left: 0; top: 0; z-index: 2;">
+        <a href="/Marketing.html"><img src="images/timebaricon1.png" width="20" height="20" /></a>
+        <a href="default.html"> Home</a>
+        <input class="btn btn-primary tbButtonSmall OpenResList" type="button" id="btnOpenResList" value="Open Res List" />
+        <input class="btn btn-primary tbButtonSmall" type="button" id="btnOpenAllocList" value="Open Alloc List" />
+        <input class="btn btn-primary tbButtonSmall" type="button" id="btnOpenTabs" value="Menu toggle" />
+        <input class="btn btn-primary tbButtonSmall ReloadPage" type="button" id="btrReloadPage" value="Reload Timescale" />
+        <input class="btn btn-primary tbButtonSmall" type="button" id="btnTesting2" value="Update Timebar Name" />
+        <input class="btn btn-primary tbButtonSmall" type="button" id="btnTestBar" value="Test Bar" />
+        <input class="btn btn-primary tbButtonSmall" type="button" id="btnReturnJSON" value="Return JSON" />
+        <input class="btn btn-primary tbButtonSmall" type="button" id="btnJSONToExcel" value="To Excel" />
+    </div>
+    <canvas id="tbCanvas" style="position: fixed; left: 0; top: 0; z-index: 1;"></canvas>
+    <div id="show-timebars" class="xxx" style="left: 0px; top: 60px; position: relative; z-index: 4;">
+    </div>
+    <div id="mainArea">
+    </div>
+
+    <!--// one hard coded time bar, need to add ID to H3 area main module that draws bars-->
+    <div id="show-timebarsTemp" class="xxx" style="left: 0px; top: 60px; position: relative; z-index: 4;">
+
+        <div class="ui-widget-content tbBarDraggableTemp" title="Jim title" id="key4" style="left: 10px; top:50px; width:50px;">
+            <div class="ui-widget-content tbBarResizableTemp">
+                <h3 id="4" class="tbBarStyleTemp"> My time Bar</h3>
+            </div>
+        </div>
+    </div>
+
+    <!--<div id="tblTabularSchedule" class="xxx">
+        <table class="clsTabularSchedule">
+            <tr>
+                <td>&nbsp;</td>
+                <td>Key</td>
+                <td>ID</td>
+                <td>TimebarName</td>
+                <td>Dur</td>
+                <td>Start</td>
+                <td>Finish</td>
+                <td>ToGo</td>
+                <td>Owner</td>
+            </tr>
+            <tr>
+                <td>Forecast</td>
+                <td>1000</td>
+                <td>3000</td>
+                <td>My first timbbar</td>
+                <td>456</td>
+                <td>Apr/15/2015</td>
+                <td>Apr/25/2015</td>
+                <td>45</td>
+                <td>Jim Cox</td>
+            </tr>
+            <tr>
+                <td>Baseline</td>
+                <td>1</td>
+                <td>4</td>
+                <td>My first timebar</td>
+                <td>300</td>
+                <td>Apr/15/2015</td>
+                <td>Apr/25/2015</td>
+                <td>45</td>
+                <td>Jim Cox</td>
+            </tr>
+            <tr>
+                <td>Actual</td>
+                <td>1</td>
+                <td>3</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+        </table>
+    </div>-->
+    <!--Temporary spot to draw the two tables, may move them to tabs and load on fly when needed instead of every page refresh-->
+    <div id="divResourceTable" class="tbSubBarStyle resource" title="Owner Medadata" style="position: fixed; left: 30px; top: 70px; z-index: 2;">
+        <h4>Resource Table</h4>
+        <p>Drag a name onto a task</p>
+        <div id="tbResourceListDiv">
+        </div>
+    </div>
+
+
+    <!--this is for the double click to add meta data to timebar-->
+    <div id="divTimeBarMetadataTable">
+        <div id="tbMetaDataForTimebarDiv">
+        </div>
+    </div>
+
+    <!--<div class="LeftMenuTile">
+        <h4>Menu</h4>
+        <table>
+            <tr>
+                <td>Key</td>
+            </tr>
+            <tr>
+                <td>Forecast</td>
+
+            </tr>
+            <tr>
+                <td>Baseline</td>
+
+            </tr>
+            <tr>
+                <td>Actual</td>
+
+            </tr>
+        </table>
+    </div>-->
+
+
+
+
+
+
+
+    <!--end temporary tables-->
+    <!--// resource chart goes in here and floats to bottom-->
+    <div id="chartArea">
+        <!--<hr />
+        <canvas id="resourceChartCanvas" width="800" height="200"></canvas>, this line not required because size of chart is set on canval js-->
+        <hr />
+        <h3> Resource Chart</h3>
+        <canvas id="resourceStackedChartCanvas"></canvas>
+        <hr />
+    </div>
+
+
+
+    <!--feedback area for loading db and bars dynamically-->
+    <div id="tbToolbar">
+        <h4>System Logging:</h4>
+        <ul id="tbNotifications"></ul>
+        <div id="tb-msg-area">
+            <h4>Data Logging:</h4>
+        </div>
+        <div id="msg"></div>
+    </div>
+
+    <!--Temporary script for modernizing the one manual test time bar-->
+    <script>
+
+        $('#btnTestBar').click(function (evnt) {
+            // alert("me")
+            makeDynamicBarsDraggableResizableTemp();
+            //$("#tblMetaDataTableForTimebar").DataTable();
+            //$("#tblAllocationTableForTimebar").DataTable();
+        });
+
+        $('#btnTestHideAlloc').click(function (evnt) {
+            // alert("me")
+            clsAllocTableOnCanvas.hide
+        });
+
+
+        // make bars draggable and sizable
+        function makeDynamicBarsDraggableResizableTemp() {
+
+            $(".tbBarDraggableTemp").draggable({
+                //   refreshPositions: true
+                grid: [10, 10],
+                snap: true,
+                snapMode: "inner",
+                snapTolerance: 9,
+                opacity: 0.50,
+                refreshPositions: true,
+                // stop: onDragStop;
+            });
+
+
+            $(".tbBarResizableTemp").resizable({
+                // aspectRatio: true,
+                //   handles: 'all',
+                distance: 10,
+                grid: [10, 10],
+                maxHeight: 200,
+                maxWidth: 800,
+                animate: false,
+                ghost: true
+            });
+        }; //end make bars dynamic
+
+
+    </script>
+
+
+
+
+
+
+    <!--Framework Scripts-->
+
+    <script src="Scripts-Framework/jquery-ui-1.11.4.js"></script>
+    <script src="Scripts-Framework/jquery.json-2.2.js"></script>
+    <script src="Scripts-Framework/jquery.dataTables.min.js" type="text/javascript"></script>
+    <script src="Scripts-Framework/bootstrap.min3.1.2.js"></script>
+    <script src="Scripts-Framework/moment.js" type="text/javascript"></script>
+
+    <!--Timebars scripts-->
+    <script src="scripts/AppCore.js" type="text/javascript"></script>
+    <script src="Scripts/DatabaseMaster.js"></script>
+
+    <script src="Scripts/Timescale1.js" type="text/javascript"></script>
+    <script src="scripts/TimeBars2.js" type="text/javascript"></script>
+
+    <script src="Scripts/DragAndDrop.js"></script>
+    <script src="scripts/DataGeneratorTimebars.js" type="text/javascript"></script>
+    <script src="scripts/OtherDraggable.js"></script>
+    <script src="scripts/DrawingFunctions.js" type="text/javascript"></script>
+    <script src="scripts/Dates.js" type="text/javascript"></script>
+    <script src="scripts/Resources.js" type="text/javascript"></script>
+    <!--<script src="scripts/Allocations.js" type="text/javascript"></script>-->
+    <script src="scripts/CRUD.js" type="text/javascript"></script>
+
+    <script src="Scripts-Framework/Chart.js"></script>
+    <script src="Scripts/ResourceCharts.js"></script>
+    <script src="Scripts-Framework/Chart.StackedBar.js"></script>
+
+
+    <!--PQ Grid files-->
+
+    <script src="pqGrid/pqgrid.min.js"></script>
+
+</body>
+</html>

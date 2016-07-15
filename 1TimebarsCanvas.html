@@ -1,0 +1,298 @@
+﻿<!-- Load canvas and draw timescale and time now etc -->
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Time Bars</title>
+    <!--Framework CSS-->
+    <link href="cssJqueryUI/jquery-ui1.11.3Smoothness2.css" rel="stylesheet" />
+    <link href="css/jquery-ui1.11.3Smoothness2.css" rel="stylesheet" />
+    <link href="css/bootstrap.min3.1.1.css" rel="stylesheet" />
+    <link href="css/jquery.dataTables.css" rel="stylesheet" />
+    <!--Timebars CSS-->
+    <link href="css/AppCss.css" rel="stylesheet" />
+    <link href="css/TimeBarCss.css" rel="stylesheet" />
+    <link href="css/MasterTimeScale.css" rel="stylesheet" />
+</head>
+<body>
+    <canvas id="tbCanvas" style="position: fixed; left: 0; top: 0; "></canvas>
+
+    <!--Top logo and link to TimeBars-->
+    <div style="position: fixed; left: 0; top: 0; z-index: 110;">
+        <a href="/Marketing.html"><img src="images/timebaricon1.png" width="20" height="20" /></a><a href="default.html"> Home</a>
+        <!--<input class="btn btn-primary tbButtonSmall" type="button" id="btnCalculate" value="Modernize now" />-->
+        <input class="btn btn-primary tbButtonSmall" type="button" id="btnOpenResList" value="Resource Allocator" />
+        <input class="btn btn-primary tbButtonSmall" type="button" id="btnShowTagger" value="Timebar Tagger" />
+        <input class="btn btn-primary tbButtonSmall" type="button" id="btnShowTimebarCreator" value="Timebar Creator" />  <!--commented this out Sep 21, will drag to clone and hide buckets instead-->
+        <input class="btn btn-primary tbButtonSmall" type="button" id="btnShowTimebarAuditor" value="Timebar Auditor" />
+        <!--<input class="btn btn-primary tbButtonSmall" type="button" id="btnOpenTabs" value="Menu toggle" /> // did this sep 20-->
+
+        <input class="btn btn-primary tbButtonSmall" type="button" id="btnPublishToAzure" value="Cloud Publish" /> &nbsp;
+        &nbsp;Status Date:<input class="btn btn-primary tbButtonSmall" style="width: 110px; color:dimgray" type="text" id="tsStatusDate" />
+        <input class="btn btn-primary tbButtonSmall ReloadPage" type="button" id="btrReloadPage" value="Reload Timescale" />
+
+    </div>
+
+    <!-- tool bars and notifications area from loading bars etc-->
+    <div style="position: fixed; left: 5px; top: 42px; right:500px; ">
+        <div class="barCoordinates" style="position: fixed; left: 10px; top: 42px; padding: 10px;"></div>
+        <div class="barStartDateOnMove" style="position: fixed; left: 130px; top: 42px; padding: 10px;"></div>
+        <div class="barFinishDateOnMove" style="position: fixed; left: 300px; top: 42px; padding: 10px;"></div>
+        <div class="barWidthPx" style="position: fixed; left: 460px; top: 42px; padding: 10px;"></div>
+        <div class="barDurationInDaysOnMove" style="position: fixed; left: 560px; top: 42px; padding: 10px;"></div>
+    </div>
+
+    <div class="deleteBucket">
+        <img id="imgDeleteBars" class="deleteBucket" title="Recycle Bin" src="images/delete.gif" />
+    </div>
+
+
+
+    <!--feedback area for loading db and bars dynamically-->
+    <div id="tbToolbar">
+        <input class="btn btn-primary tbButtonSmall" type="button" id="btnCloseTimebarAuditor" value="Close" />
+        <ul id="tbNotifications"></ul>
+        <div id="tb-msg-area"></div>
+        <div id="msg">
+            <table id="employees">jtable</table>
+
+
+        </div>
+    </div>
+
+    <!-- One manual time bar
+    <div class="ui-widget-content" id="key1" style="left: 150px; top: 60px; position: relative; z-index: 2;">
+            <div class="ui-widget-content" id="resizableY">
+                <h3 id="1" class="tbBarStyle"> Task 4 </h3>
+            </div>
+        </div>-->
+
+    <div class="tagBuckets" id="divTagBuckets">
+        Drop Timebars into Buckets for Tagging <!--<a href="javascript:void(0)" onclick="closeTaggerPanel();">close me</a>-->
+        <input class="btn btn-primary tbButtonSmall ShowTagger" type="button" id="btnHideTagger" value="Close" />
+        <div>
+            <img class="buckets" id="imgBucketStatus" src="images/buckets/bucketstatus.png" height="97" width="90" />
+            <img class="buckets" id="imgBucketPriority" src="images/buckets/bucketpriority.png" height="97" width="90" />
+            <img class="buckets" id="imgBucketHealth" src="images/buckets/buckethealth.png" height="97" width="90" />
+            <img class="buckets" id="imgBucketPhase" src="images/buckets/bucketphase.png" height="97" width="90" />
+            <img class="buckets" id="imgBucketStage" src="images/buckets/bucketstage.png" height="97" width="90" />
+            <img class="buckets" id="imgBucketCategory" src="images/buckets/bucketcategory.png" height="97" width="90" />
+
+        </div>
+        <div>
+            <img class="buckets" id="imgBucketResponsibility" src="images/buckets/bucketresponsibility.png" height="97" width="90" />
+            <img class="buckets" id="imgBucketProjectManager" src="images/buckets/bucketpm.png" height="97" width="90" />
+            <img class="buckets" id="imgBucketDepartment" src="images/buckets/bucketdept.png" height="97" width="90" />
+            <img class="buckets" id="imgBucketExSponsor" src="images/buckets/bucketsponsor.png" height="97" width="90" />
+            <img class="buckets" id="imgBucketContact" src="images/buckets/bucketcontact.png" height="97" width="90" />
+            <img class="buckets" id="imgBucketLocation" src="images/buckets/bucketlocation.png" height="97" width="90" />
+        </div>
+        <div>
+            <img class="buckets" id="imgBucketProjectNumber" src="images/buckets/bucketprojectno.png" height="97" width="90" />
+            <img class="buckets" id="imgBucketProjectType" src="images/buckets/buckettype.png" height="97" width="90" />
+            <img class="buckets" id="imgBucketProduct" src="images/buckets/bucketproduct.png" height="97" width="90" />
+            <img class="buckets" id="imgBucketYesNo" src="images/buckets/bucketyesno.png" height="97" width="90" />
+            <img class="buckets" id="imgBucketShowIn" src="images/buckets/bucketshowin.png" height="97" width="90" />
+            <img class="buckets" id="imgBucketSeverity" src="images/buckets/bucketseverity.png" height="97" width="90" />
+        </div>
+    </div>
+
+
+    <!--My Pf Right Click Menu-->
+
+    <div id="pfRightClickMenu" class="pfRightClickMenu" title="Portfolios Menu">
+        <div>
+            <p id="rcmPfShowStatus">Portfolio Status</pid="rcmCanvasReloadPage">
+            <p id="rcmPfShowProjects">Show Projects in Pf</p>
+            <p id="rcmPfShowReleases">Show Releases in Pf</p>
+            <p id="rcmPfReloadPage">Reload Page</p>
+        </div>
+    </div>
+
+    <!--My Proj Right Click Menu-->
+
+    <div id="projRightClickMenu" class="projRightClickMenu" title="Projects Menu">
+        <div>
+            <p id="rcmProjStatus">Project Status</p>
+            <p id="rcmProjTasks">Show Tasks in Project</p>
+            <p id="rcmProjMilestones">Show Project Milestones</p>
+            <p id="rcmProjReleases">Show Project Releases</p>
+            <p id="rcmProjReports">Project Reports</p>
+            <p id="rcmProjReloadPage">Reload Page</p>
+        </div>
+    </div>
+    <!--Release Right Click Menu-->
+    <div id="relRightClickMenu" class="relRightClickMenu" title="Releases Menu">
+        <div>
+            <p id="rcmRelStatus">Release Status</p>
+            <p id="rcmRelTasks">Projects with Tasks in Release</p>
+            <p id="rcmRelStages">Show Release Stages</p>
+            <p id="rcmRelAlloc">Resource Allocations by Release</p>
+            <p id="rcmRelReports">Release Reports</p>
+            <p id="rcmRelReloadPage">Reload Page</p>
+        </div>
+    </div>
+    <!--Task Right Click Menu-->
+    <div id="taskRightClickMenu" class="taskRightClickMenu" title="Tasks Menu">
+        <p id="1" class="tbBarStyle"> Task 4 </p>
+        <div>
+            <p id="rcmTaskSchedInfo">Show Task Schedule Info</p>
+            <p id="rcmTaskMetaData">Show Task Metadata</p>
+            <p id="rcmTaskalloc">Show Resource Allocations</p>
+            <p id="rcmTaskResProfile">Go to Resource Profile</p>
+            <p id="rcmTaskMilestones">Task and Milestone Reports</p>
+            <p id="rcmTaskReloadPage">Reload Page</p>
+        </div>
+    </div>
+
+    <!--Canvas Right Click Menu-->
+
+    <div id="canvasRightClickMenu" class="canvasRightClickMenu" title="Global Menu">
+        <div>
+            <p id="rcmCanvasAddNewTimebars">Add new Timebars</p>
+            <p id="rcmCanvasShowResAlloc">Show Resource Allocator</p>
+            <p id="rcmCanvasShowTimebarTagger">Show Timebar Tagger</p>
+            <p id="rcmCanvasHomeToAdmin">Home to Administration Page</p>
+            <p id="rcmCanvasTabToggle">Tab Toggle</p>
+            <p id="rcmCanvasReloadPage">Reload Page</p>
+        </div>
+    </div>
+
+    <!-- Dynamic bar area-->
+    <table id="show-timebars" class="xxx" style="left: 0px; top: 60px; position: relative;"></table>
+
+    <!-- Drop to create area, is invisible area for now, may need later-->
+    <div id="popupOffBar" class="clsPopupOffBar" style="left: 300px; top: 240px; position: absolute; z-index: 111;">
+
+    </div>
+
+    <!-- Drop to create area, is invisible area for now, may need later-->
+    <div id="droptoCreateTimebar" class="clsDroptoCreateTimebar" style="left: 5px; top: 240px; position: absolute; ">
+
+    </div>
+
+
+    <!--show the ResList-->
+    <div id="divResourceTable" class="box2 resource" style="position: fixed; left: 30px; top: 80px; ">
+        <h4>Resource List</h4>
+        Drag Name onto Timebar to create Allocation <input class="btn btn-primary tbButtonSmall" type="button" id="btnCloseResList" value="Close" /><p></p>
+        <div id="tbResourceListDiv">
+        </div>
+    </div>
+    <!--show the Tagger List-->
+    <div id="divForTagTable" class="metadataTaggerPopup" style="position: absolute; left: 480px; width: 120px; top: 90px;background-color: rgba(239, 239, 200, 255);">
+        <p>Click or Tap a Value</p>
+        <div id="tbTagListDiv">
+        </div>
+    </div>
+    <!--show the create New Timebar List-->
+    <div id="divForNewBarTable" class="box2" title="Add New Timebar" style="width: 120px; position: fixed; left: 500px; top: 90px; ">
+        <h4>Bar Creation</h4>
+        <p>Drag and Drop item to create new Timebar</p>
+        <div id="tbNewBarPickListDiv">
+        </div>
+    </div>
+
+    <!--timescale controller and double click area-->
+    <div id="tsDoubleClickArea" class="tbTimeScale"></div>
+    <div id="tsController" class="tbTimeScale">
+        <form id="tsControllerForm">
+            <h4>Timescale Controller</h4>
+
+            Timescale Start Date
+            <div><input type="text" id="tsStartDateOld" disabled size="12" /> </div>
+            Weekly or Monthly
+            <div><input type="text" id="tsDaysWeeksOrMonthsOld" disabled size="12" /></div>
+
+            Change Timescale (double click timescale to close)<br />
+            <input type="text" size="12" id="tsStartDateNew" class="tsStartDate" />
+            <select id="tsDaysWeeksOrMonthsNew">
+                <option value="blank"></option>
+                <option value="Weekly">Weekly</option>
+                <option value="Monthly">Monthly</option>
+            </select>
+            <input type="button" class="btn tbButtonSmall" id="btnChangeTS" value="Change now" />
+        </form>
+    </div>
+    <!-- End canvas-->
+    <!--old help menu, movable tabs may bring back-->
+    <!--<div id="tabsMenuDraggable" style="Width: 600px; height: 350px; position: fixed; left: 900px; top: 50px; z-index: 5;">
+
+        <div id="tabsMenu" style="Width: 400px; height: 350px">
+            <ul>
+                <li><a href="#tabs-view">View</a></li>
+                <li><a href="#tabs-data">Errors</a></li>
+                <li><a href="#tabs-help">Help</a></li>
+                <li><a href="#tabs-demo">Demo</a></li>
+            </ul>
+            <div id="tabs-view">
+                <div class="TSNote" style="position: relative; left: 190px; top: -10px;">Drag me around</div>
+                <p>Change TimeScale:</p>
+                <input class="btn btn-primary" type="button" id="ChangeTSToWeeks1" value="To Weeks">
+                <input class="btn btn-primary" type="button" id="ChangeTSToMonths1" value="To Months">
+                <div>
+                    Pick Time Scale Start date: <input type="text" class="tsStartDate" id="tsStartDateId" />
+                </div>
+            </div>
+            <div id="tabs-data">
+                <p>Link to O365 Task List</p>
+                feedback area for loading db and bars dynamically
+                <div id="tbToolbar">
+                    <ul id="tbNotifications"></ul>
+                    <div id="tb-msg-area">
+                    </div>
+                    <table class="table" id="tb-list" border='2'></table>
+                    <div id="msg">
+                    </div>
+
+                </div>
+            </div>
+            <div id="tabs-help">
+                <p>
+                    - Browser based Scheduling Engine<br />
+                    - Touch Enabled CPM Scheduling<br />
+                    - Drag and Drop Tagging for Organizing Schedule data<br />
+                    - Populate the schedule bars from O365 lists<br />
+                    - Create, Read, Update and delete data (CRUD) via OData in O365<br />
+                    - Cloud based bar calendars to block out weekends or other non work days<br />
+                    - Sample Schedule templates available in O365 lists in SharePoint Site<br />
+                </p>
+            </div>
+            <div id="tabs-demo">
+                <div>
+                    <p><a href="/defaultOld.html">Last Build</a></p>
+
+
+                </div>
+            </div>
+        </div>
+    </div> -->
+    <!--Framework Scripts-->
+    <script src="Scripts-Framework/jquery-1.10.2.js"></script>
+    <script src="Scripts-Framework/jquery-ui-1.11.4.js"></script>
+    <script src="Scripts-Framework/jquery.ui.touch-punch.min.js"></script>
+    <script src="Scripts-Framework/jquery.json-2.2.js"></script>
+    <script src="Scripts-Framework/jquery.dataTables.min.js" type="text/javascript"></script>
+    <script src="Scripts-Framework/bootstrap.min3.1.2.js"></script>
+    <script src="Scripts-Framework/moment.js" type="text/javascript"></script>
+
+    <!--Timebars scripts-->
+    <script src="Scripts/DatabaseMaster.js"></script>
+    <script src="scripts/AppCore.js" type="text/javascript"></script>
+    <script src="Scripts/Timescale1.js" type="text/javascript"></script>
+    <script src="scripts/TimeBars1Dec5.js" type="text/javascript"></script>
+    <script src="Scripts/CRUD.js"></script>
+    <script src="Scripts/DragAndDrop.js"></script>
+    <script src="scripts/DataGeneratorTimebars.js" type="text/javascript"></script>
+    <script src="scripts/Dates.js" type="text/javascript"></script>
+    <script src="Scripts/PopupOnBar.js"></script>
+    <script src="Scripts/Resources.js"></script>
+
+    <script src="Scripts/PopUpsAndMenus.js"></script>
+
+    <script src="Scripts/RestAzure.js"></script>
+    <script src="Scripts/TimebarCreation.js"></script>
+</body>
+
+</html>

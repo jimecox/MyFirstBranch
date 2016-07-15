@@ -1,0 +1,170 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Timebars Sortable Listing</title>
+    <!--Framework CSS-->
+    <link href="cssJqueryUI/jquery-ui1.11.3Smoothness2.css" rel="stylesheet" />
+    <link href="css/jquery-ui1.11.3Smoothness2.css" rel="stylesheet" />
+    <link href="css/bootstrap.min3.1.1.css" rel="stylesheet" />
+    <link href="css/jquery.dataTables.css" rel="stylesheet" />
+    <!--Timebars CSS-->
+    <link href="css/AppCss.css" rel="stylesheet" />
+    <link href="css/TimeBarCss.css" rel="stylesheet" />
+    <link href="css/MasterTimeScale.css" rel="stylesheet" />
+<!--Note, Framework and timebars scrips references  are on top on this page only, because inline script is on this page-->
+    <!--Framework Scripts-->
+    <script src="Scripts-Framework/jquery-1.10.2.js"></script>
+    <script src="Scripts-Framework/jquery-ui-1.11.4.js"></script>
+    <script src="Scripts-Framework/jquery.json-2.2.js"></script>
+    <script src="Scripts-Framework/jquery.dataTables.min.js" type="text/javascript"></script>
+    <script src="Scripts-Framework/bootstrap.min3.1.2.js"></script>
+    <script src="Scripts-Framework/moment.js" type="text/javascript"></script>
+
+    <!--Timebars scripts-->
+    <script src="scripts/AppCore.js" type="text/javascript"></script>
+    <script src="Scripts/DragAndDrop.js"></script>
+    <script src="scripts/DataGeneratorTimebars.js" type="text/javascript"></script>
+    <script src="scripts/OtherDraggable.js"></script>
+    <script src="scripts/DrawingFunctions.js" type="text/javascript"></script>
+    <script src="scripts/Dates.js" type="text/javascript"></script>
+</head>
+
+
+<body>
+    <!--Top logo and link to TimeBars-->
+    <div style="position: fixed; left: 0; top: 0; z-index: 2;">
+        <a href="/default.html"><img src="images/timebaricon1.png" width="20" height="20" /></a><a href="/default.html">Time Bars.com</a>
+        <strong>Timebars Listing (tabular view of timebars)</strong>
+        <input class="btn btn-primary" type="button" id="btnCalculate" value="Enhanced View" />
+    </div>
+    <!-- Display area-->
+    <div id="tb-listDiv" style="position: fixed; left: 180px; top: 40px;">
+        This is div that loads the data tables
+    </div>
+    <!--Notifications area-->
+    <div id="tbToolbar" style="position: fixed; left: 2px; top: 40px;">
+        <ul id="tbNotifications"></ul>
+        <div id="tb-msg-area">
+        </div>
+        
+        <div id="msg">
+
+        </div>
+    </div>
+
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            LoadAllTimeBars()
+
+            function InitDataTables() {
+
+                $('#tb-listing2').DataTable();
+
+            }
+
+
+            $('#btnCalculate').click(function () {
+                InitDataTables();
+            });
+
+            function LoadAllTimeBars() {
+                // load indexed db data into timebars time scale, db already exists see test3.js
+                var note = document.getElementById('tbNotifications');
+                var db;
+                var taskList = document.getElementById('task-list');
+
+                var submit = document.getElementById('submit');
+                const DB_NAME = 'tbIndexedDB22';
+                const DB_VERSION = 13;
+                const STORE_NAME = 'tbTimebars';
+
+                //var DB_NAME = 'tbIndexedDB23';
+                //var DB_VERSION = 1;
+                //var STORE_ADMINPANEL = 'tbAdminPanel';
+                //var STORE_TIMEBARS = 'tbTimebars';
+
+                window.onload = function () {
+
+                    note.innerHTML += '<li>App initialised.</li>';
+                    // In the following line, you should include the prefixes of implementations you want to test.
+                    window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+                    // References to some window.IDB* objects:
+                    window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction;
+                    window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange;
+                    // Open existing database
+                    var DBOpenRequest = window.indexedDB.open(DB_NAME, DB_VERSION);
+                    // load status to UI if opened successfully, or not
+                    DBOpenRequest.onerror = function (event) {
+                        note.innerHTML += '<li>Error loading database.</li>';
+                    };
+                    DBOpenRequest.onsuccess = function (event) {
+                        note.innerHTML += '<li>Database initialised.</li>';
+                        // store the result of opening the database in the db variable
+                        db = DBOpenRequest.result;
+                        // populate list in the tabs, Run the displayTimeBarsList function
+                        displayTimeBarsList2();
+                        // draw the dynamic bars on time scale
+                        //ShowDynamicTimeBars();
+                    };
+                }
+                //get object store aka tables
+                function getTbObjectStore(STORE_NAME, mode) {
+                    var tx = db.transaction(STORE_NAME, mode);
+                    return tx.objectStore(STORE_NAME);
+                }
+
+                // generate html table of time bar listing shows up on tabs
+                function displayTimeBarsList2() {
+                    if (typeof store == 'undefined')
+                        store = getTbObjectStore('tbStore9', 'readonly');
+                    var pub_msg = $('#tb-msg-area');
+                    pub_msg.empty();
+                    var tb_list = $('#tb-listDiv');
+                    tb_list.empty();
+                    var req;
+                    var $table = $('<table id="tb-listing2">');
+                    $table.append('<thead><tr><th>Key</th><th>ID</th><th>Name</th><th>Duration</th><th>Start</th><th>Finish</th><th>Rem Dur</th><th>Owner</th><th>Top</th><th>Left</th></tr></thead>');
+                    $table.append('<tfoot><tr><th>Key</th><th>ID</th><th>Name</th><th>Duration</th><th>Start</th><th>Finish</th><th>Rem Dur</th><th>Owner</th><th>Top</th><th>Left</th></tr></tfoot><tbody>');
+
+                    req = store.count();
+                    req.onsuccess = function (evnt) {
+                        pub_msg.append('<p>There are <strong>' + evnt.target.result + '</strong> record(s) in,<br> the Timebars List.</p>');
+                    };
+                    req.onerror = function (evnt) {
+                        displayFailureMessage(this.error);
+                    };
+                    req = store.openCursor();
+
+                    req.onsuccess = function (evnt) {
+                        var cursor = evnt.target.result;
+                        if (cursor) {
+                            req = store.get(cursor.key);
+                            req.onsuccess = function (evnt) {
+
+                                var value = evnt.target.result;
+                                $table.append('<tr><td>' + cursor.key + '</td><td>' + value.tbID + '</td><td>' + value.tbName + '</td><td>' + value.tbDuration + '</td><td>' + value.tbStart + '</td><td>' + value.tbFinish + '</td><td>' + value.tbRemainingDuration + '</td><td>' + value.tbOwner + '</td><td>' + value.tbCoordTop + '</td><td>' + value.tbCoordLeft + '</td></tr>');
+
+                            };
+                            cursor.continue();
+
+                        };
+                        $table.append('<tbody></tbody>');
+                        tb_list.append($table)
+                    };
+
+
+                };
+
+            };
+        });
+
+    </script>
+
+
+
+</body>
+
+</html>
